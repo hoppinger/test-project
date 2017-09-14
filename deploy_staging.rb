@@ -20,7 +20,7 @@ git_url = 'git@github.com:hoppinger/test-project.git'
 expose_to_port = '5151'
 
 cluster_nodes = [
-  'deployer@sweden.hoppinger.com'
+  'deployer@stockholm.sweden.hoppinger.com'
 ]
 
 num_deploys_to_keep = 2

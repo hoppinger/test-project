@@ -46,17 +46,7 @@ namespace SimpleModelsAndRelations
   {
     public Startup(IHostingEnvironment env)
     {
-      var builder = new ConfigurationBuilder()
-          .SetBasePath(env.ContentRootPath)
-          .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-          .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
-      builder.AddEnvironmentVariables();
-      Configuration = builder.Build();
-      if(!env.IsDevelopment())
-      {
-        env.ConfigureNLog("nlog.config");
-      }
     }
 
     public IConfigurationRoot Configuration { get; }
@@ -64,88 +54,15 @@ namespace SimpleModelsAndRelations
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-      services.AddAntiforgery(options => options.HeaderName = "X-XSRF-TOKEN");
 
-      services.AddDbContext<SimpleModelsAndRelationsContext>(options =>
-      {
-        options.UseSqlite(Configuration.GetConnectionString("SimpleModelsAndRelationsConnection"));
-      });
-
-      Microsoft.Extensions.DependencyInjection.OptionsConfigurationServiceCollectionExtensions.Configure<MailOptions>(services, Configuration);
-      Microsoft.Extensions.DependencyInjection.OptionsConfigurationServiceCollectionExtensions.Configure<ApiOptions>(services, Configuration);
-
-      var mailApiToken = Configuration.GetValue<string>("MailApiToken");
-      var mailFrom = Configuration.GetValue<string>("MailFrom");
-      StaticMailer._mailOptions.MailApiToken = mailApiToken;
-      StaticMailer._mailOptions.MailFrom = mailFrom;
-
-      // services.AddIdentity<ApplicationUser, IdentityRole>()
-      //     .AddEntityFrameworkStores<ApplicationDbContext>()
-      //     .AddDefaultTokenProviders();
-
-      services.AddMvc().AddJsonOptions(options =>
-         {
-           options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
-           options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-           options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.RoundtripKind;
-         });
-
-      // Adds a default in-memory implementation of IDistributedCache.
-      services.AddDistributedMemoryCache();
-
-      services.AddSession(options =>
-      {
-        options.CookieName = ".SimpleModelsAndRelations.Session804";
-        options.IdleTimeout = TimeSpan.FromDays(365);
-        options.CookieHttpOnly = true;
-      });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IOptions<ApiOptions> apiOptionsAccessor, IHostingEnvironment env, ILoggerFactory loggerFactory, SimpleModelsAndRelationsContext dbContext, IAntiforgery antiforgery)
-    {
-      loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-
-      Filters.RestrictToUserTypeAttribute.ApiToken = apiOptionsAccessor.Value.ApiToken;
-
-      if (env.IsDevelopment())
-      {
-        app.UseDeveloperExceptionPage();
-        app.UseDatabaseErrorPage();
-        app.UseBrowserLink();
-        SimpleModelsAndRelationsContextSeeds.Initialize(dbContext);
-      }
-      else
-      {
-        app.UseExceptionHandler("/Home/Error");
-        loggerFactory.AddNLog();
-      }
-      app.Use(async (context, next) =>
-      {
-        context.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
-        await next();
-      });
-      SimpleModelsAndRelationsContextSeeds.InitializePagesAndSingletons(dbContext);
-
-      app.UseStaticFiles();
-
-      // app.UseIdentity();
-
-      app.UseSession();
-
+    public void Configure()
+    { 
       app.UseMvc(routes =>
       {
-      });
-
-      Thread KeepAliveThread = new Thread(new ThreadStart(KeepAlive));   
-      
-    }
-
-    public static void KeepAlive() {
-      while (true) {
-        Thread.Sleep(TimeSpan.FromSeconds(10));
-        Console.WriteLine("KEEP-ALIVE");
-      }
+      }); 
     }
   }
 }
