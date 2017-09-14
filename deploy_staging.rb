@@ -20,7 +20,6 @@ git_url = 'git@github.com:hoppinger/test-project.git'
 expose_to_port = '5151'
 
 cluster_nodes = [
-  # 'ikamiut.greenland.hoppinger.com',
   'deployer@sweden.hoppinger.com'
 ]
 
